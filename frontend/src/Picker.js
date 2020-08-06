@@ -17,7 +17,6 @@ class Picker extends React.Component{
                     <option value="Fort Sterling">Fort Sterling</option>
                     <option value="Martlock">Martlock</option>
                     <option value="Caerleon">Caerleon</option>
-                    <option value="Black Market">Black Market</option>
                 </select>
                 <label htmlFor="sellCity">Choose sell city: </label>
                 <select name="sellCity" id="sellCity" value={this.props.sellCity} onChange={this.props.onSellCity}>
