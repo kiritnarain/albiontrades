@@ -30,7 +30,7 @@ app.get('/trade/:buyCity/:sellCity/:maxInvestment/:maxItems', (req, res) => {
     var buyCity = req.params.buyCity;
     var sellCity = req.params.sellCity;
     var maxItems = req.params.maxItems;
-    var result = findItems(buyCity, sellCity, SELLPRIORITY_SELL_MIN, maxItems, req.params.maxInvestment);
+    var result = findItems(buyCity, sellCity, SELLPRIORITY_BUY_MAX, maxItems, req.params.maxInvestment);
     res.send(JSON.stringify(result));
 });
 
