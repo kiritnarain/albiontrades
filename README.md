@@ -6,7 +6,7 @@ Albion Trades consists of 2 parts:
 2) A React frontend interface that uses the API (/frontend)
 
 # API
-To build the API, run: node index.js
+To build the API, run: node index.js (or: forever index.js)
 The API uses the Albion Online Data Project (https://www.albion-online-data.com/) to retrieve pricing information for items at different cities. It then filters out out-of-date pricing and uses a Max-Heap Priority Queue to retrieve items where the price difference between two cities is the largest.
 
 Supported commands:

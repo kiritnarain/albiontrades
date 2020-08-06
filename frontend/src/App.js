@@ -7,10 +7,16 @@ import ItemListing from "./ItemListing";
 class App extends React.Component{
     constructor(props) {
         super(props);
+        var maxInvestment = localStorage.getItem('maxInvestment');
+        if(maxInvestment===undefined || maxInvestment==null){
+            maxInvestment = 10000000; //Default Maximum investment
+        }
+
+
         this.state = {
-            API: 'http://127.0.0.1:3000',
+            API: 'http://139.162.48.23:5000',
             maxItems: 30,
-            maxInvestment: 1000000,
+            maxInvestment: maxInvestment,
             buyCity: 'Thetford',
             sellCity: 'Black Market',
             cities: ['Bridgewatch', 'Lymhurst', 'Thetford', 'Fort Sterling', 'Martlock', 'Caerleon', 'Black Market']
@@ -36,9 +42,11 @@ class App extends React.Component{
     };
 
     maxInvestmentChanged = (event) => {
+        localStorage.setItem('maxInvestment', event.target.value);
         this.setState({
             maxInvestment: parseInt(event.target.value)
         });
+
     };
 
 

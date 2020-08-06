@@ -54,6 +54,11 @@ app.get('/item/:itemID/:quality', (req, res) => {
     res.send(JSON.stringify(itemPrices[req.params.itemID][req.params.quality]));
 });
 
+app.get('/reload', (req, res) => {
+    lazyFetchPrices();
+    res.send('ok');
+});
+
 app.listen(port, () => console.log(`AlbionTrades app listening at http://localhost:${port}`));
 
 

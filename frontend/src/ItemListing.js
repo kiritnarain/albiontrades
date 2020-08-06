@@ -39,6 +39,7 @@ class ItemListing extends React.Component{
             sellSection = `/${this.props.sellCity}/`;
         }
         const request = `${this.props.API}/trade/${this.props.buyCity}${sellSection}${this.props.maxInvestment}/${this.props.maxItems}`;
+        console.log('request: '+request);
         fetch(request)
             .then(res => res.json())
             .then(
@@ -51,7 +52,7 @@ class ItemListing extends React.Component{
                 // instead of a catch() block so that we don't swallow
                 // exceptions from actual bugs in components.
                 (error) => {
-                    console.log(error);
+                    console.log(error)
                 }
             )
     }
