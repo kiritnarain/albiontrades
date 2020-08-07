@@ -12,6 +12,7 @@ const SELLPRIORITY_BUY_MAX = 'buy_price_max';
 const SELLPRIORITY_SELL_MIN = 'sell_price_min';
 
 
+
 var itemPrices = {}; //Map from item_id -> {item_name, city -> prices as defined in the albion online API}
 const dataValidityTime = 24 * 3600000; //Hours * MILI in 1 hour
 var csvData = [];
