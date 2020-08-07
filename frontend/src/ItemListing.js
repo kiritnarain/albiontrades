@@ -37,10 +37,18 @@ class ItemListing extends React.Component{
         var sellSection = '/';
         let request;
         if(this.props.buyCity!==undefined && this.props.buyCity!=='' && this.props.sellCity!==undefined && this.props.sellCity!==''){
+            //City to city trade
             request = `${this.props.API}/trade/${this.props.buyCity}/${this.props.sellCity}/${this.props.maxInvestment}/${this.props.maxItems}`;
         }else if(this.props.buyCity!==undefined && this.props.buyCity!== ''){
+            //City to any trade
             request = `${this.props.API}/trade/${this.props.buyCity}/${this.props.maxInvestment}/${this.props.maxItems}`;
-        }else if(this.props.sellCity!==undefined && this.props.s)
+        }else if(this.props.sellCity!==undefined && this.props.sellCity!==''){
+            //Any to city trade
+            request = `${this.props.API}/trade/sell/${this.props.sellCity}/${this.props.maxInvestment}/${this.props.maxItems}`;
+        }else{
+            //Any to any trade
+            request = `${this.props.API}/trade/${this.props.maxInvestment}/${this.props.maxItems}`;
+        }
         console.log('request: '+request);
         fetch(request)
             .then(res => res.json())
