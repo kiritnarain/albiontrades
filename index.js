@@ -26,6 +26,11 @@ app.use(cors()); // Use this after the variable declaration
 
 app.get('/', (req, res) => res.send('Hello World!'));
 
+app.get('/trade/:maxInvestment/:maxItems', (req, res) => {
+    let result = findAnyItems(SELLPRIORITY_BUY_MAX, req.params.maxItems, req.params.maxInvestment);
+    res.send(JSON.stringify(result));
+});
+
 app.get('/trade/:buyCity/:sellCity/:maxInvestment/:maxItems', (req, res) => {
     var buyCity = req.params.buyCity;
     var sellCity = req.params.sellCity;
@@ -185,6 +190,57 @@ function parsePrices(data) {
         //console.log(snapshot.item_id+": "+itemPrices[snapshot.item_id][snapshot.city].sell_price_min);
     }
     //console.log(`${Object.keys(itemPrices).length} total items received`);
+}
+
+function findAnyItems(sellProperty, maxItems, maxInvestment){
+    var pq = new PriorityQueue();
+    for (const [itemID, obj] of Object.entries(itemPrices)) {
+        for (const [quality, obj2] of Object.entries(itemPrices[itemID])) {
+            if (quality === 'item_name') {
+                continue;
+            }
+
+            let buyCity = null;
+            let buyPrice = 0;
+            let sellCity = null;
+            let sellPrice = 0;
+
+            for(const[city, obj3] of Object.entries(itemPrices[itemID][quality])){
+                //Update buyPrice
+                if( city!=='Black Market' && isDateValid(itemPrices[itemID][quality][city].sell_price_min_date) && (buyCity==null || itemPrices[itemID][quality][city].sell_price_min < buyPrice)){
+                    buyCity = city;
+                    buyPrice = itemPrices[itemID][quality][city].sell_price_min;
+                }
+
+                //Update sellPrice
+                let sellDate;
+                if(sellProperty===SELLPRIORITY_BUY_MAX){
+                    sellDate = itemPrices[itemID][quality][city].buy_price_max_date;
+                }else{
+                    sellDate = itemPrices[itemID][quality][city].sell_price_min_date;
+                }
+                if(isDateValid(sellDate) && (sellCity==null || itemPrices[itemID][quality][city][sellProperty] > sellPrice)){
+                    sellCity = city;
+                    sellPrice = itemPrices[itemID][quality][city][sellProperty];
+                }
+            }
+
+
+            if (buyCity!==null && sellCity!==null && itemPrices[itemID][quality][buyCity].sell_price_min <= maxInvestment) {
+                let price = itemPrices[itemID][quality][sellCity][sellProperty];
+                if (sellCity === 'Black Market') {
+                    price = itemPrices[itemID][quality][sellCity].buy_price_max;
+                }
+                var pn = new PriorityNode(itemID, buyCity, itemPrices[itemID][quality][buyCity].sell_price_min, sellCity, price, quality);
+                if (pn.profit > 0) {
+                    pq.add(pn);
+                }
+
+            }
+        }
+
+    }
+    return getItems(pq, maxItems);
 }
 
 //sellProperty -> either sell_price_min or buy_price_max

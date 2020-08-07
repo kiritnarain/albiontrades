@@ -35,10 +35,12 @@ class ItemListing extends React.Component{
     fetchListings() {
         //console.log('Called fetchListing');
         var sellSection = '/';
-        if(this.props.sellCity!==undefined && this.props.sellCity!==''){
-            sellSection = `/${this.props.sellCity}/`;
-        }
-        const request = `${this.props.API}/trade/${this.props.buyCity}${sellSection}${this.props.maxInvestment}/${this.props.maxItems}`;
+        let request;
+        if(this.props.buyCity!==undefined && this.props.buyCity!=='' && this.props.sellCity!==undefined && this.props.sellCity!==''){
+            request = `${this.props.API}/trade/${this.props.buyCity}/${this.props.sellCity}/${this.props.maxInvestment}/${this.props.maxItems}`;
+        }else if(this.props.buyCity!==undefined && this.props.buyCity!== ''){
+            request = `${this.props.API}/trade/${this.props.buyCity}/${this.props.maxInvestment}/${this.props.maxItems}`;
+        }else if(this.props.sellCity!==undefined && this.props.s)
         console.log('request: '+request);
         fetch(request)
             .then(res => res.json())
