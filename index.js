@@ -46,7 +46,7 @@ app.get('/trade/:buyCity/:maxInvestment/:maxItems', (req, res) => {
     console.log('got global profit item request');
     var buyCity = req.params.buyCity;
     var maxItems = req.params.maxItems;
-    var result = findGlobalProfitItems(buyCity, SELLPRIORITY_SELL_MIN, maxItems, req.params.maxInvestment);
+    var result = findGlobalProfitItems(buyCity, SELLPRIORITY_BUY_MAX, maxItems, req.params.maxInvestment);
     res.send(JSON.stringify(result));
 });
 
@@ -282,11 +282,20 @@ function findGlobalProfitItems(buyCity, sellProperty, maxItems, maxInvestment) {
                     //console.log('iterating on city: '+city);
                     if (city !== buyCity) {
                         var price = itemPrices[itemID][quality][city][sellProperty];
-                        if (city === 'Black Market') {
-                            price = itemPrices[itemID][quality][city].buy_price_max;
-                        }
+                        let sellPriceDate;
                         //Try filtering old listings
-                        let sellPriceDate = Date.parse(itemPrices[itemID][quality][city].sell_price_min_date);
+                        if(sellProperty===SELLPRIORITY_BUY_MAX){
+                            sellPriceDate = Date.parse(itemPrices[itemID][quality][city].buy_price_max_date);
+                        }else{
+                            sellPriceDate = Date.parse(itemPrices[itemID][quality][city].sell_price_min_date);
+                        }
+
+                        if (city === 'Black Market') { //Always use buy order price for Black Market
+                            price = itemPrices[itemID][quality][city].buy_price_max;
+                            sellPriceDate = Date.parse(itemPrices[itemID][quality][city].buy_price_max_date);
+                        }
+
+
 
 
                         if (price !== 0 && (Date.now() - sellPriceDate) < dataValidityTime) {
