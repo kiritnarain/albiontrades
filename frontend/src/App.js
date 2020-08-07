@@ -17,8 +17,8 @@ class App extends React.Component{
             API: 'http://139.162.48.23:5000',
             maxItems: 30,
             maxInvestment: maxInvestment,
-            buyCity: 'Thetford',
-            sellCity: 'Black Market',
+            buyCity: '',
+            sellCity: '',
             cities: ['Bridgewatch', 'Lymhurst', 'Thetford', 'Fort Sterling', 'Martlock', 'Caerleon', 'Black Market']
         }
     }

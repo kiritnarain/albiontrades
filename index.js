@@ -274,21 +274,20 @@ function findSellItems(sellCity, sellProperty, maxItems, maxInvestment){
     var pq = new PriorityQueue();
     for (const [itemID, obj] of Object.entries(itemPrices)) {
         for (const [quality, obj2] of Object.entries(itemPrices[itemID])) {
-            if (quality === 'item_name') {
+            if (quality === 'item_name' || !isDateValid(itemPrices[itemID][quality][sellCity].sell_price_min_date)) {
                 continue;
             }
             let buyCity = null;
             let buyPrice = 0;
             for(const [city, obj3] of Object.entries(itemPrices[itemID][quality])){
                 if(city!==sellCity && city!=='Black Market'){
-                    if(itemPrices[itemID][quality][city].sell_price_min!==0 && isDateValid(itemPrices[itemID][quality][city].sell_price_min_date) &&
-                        itemPrices[itemID][quality][city].sell_price_min>buyPrice){
+                    if(itemPrices[itemID][quality][city].sell_price_min!==0 && isDateValid(itemPrices[itemID][quality][city].sell_price_min_date) && (buyCity==null || itemPrices[itemID][quality][city].sell_price_min<buyPrice)){
                         buyPrice = itemPrices[itemID][quality][city].sell_price_min;
                         buyCity = city;
                     }
                 }
             }
-            if (buyPrice!==null && buyPrice!==0 && isDateValid(itemPrices[itemID][quality][sellCity].sell_price_min_date) && buyPrice <= maxInvestment) {
+            if (buyCity!==null && buyPrice!==0 && buyPrice <= maxInvestment) {
                 let price = itemPrices[itemID][quality][sellCity][sellProperty];
                 if (sellCity === 'Black Market') {
                     price = itemPrices[itemID][quality][sellCity].buy_price_max;
