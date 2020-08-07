@@ -58,7 +58,7 @@ app.get('/trade/:buyCity/:maxInvestment/:maxItems', (req, res) => {
     res.send(JSON.stringify(result));
 });
 
-app.get('/trade/sell/:sellCity/:maxInvestment/:maxItems', (req, res) => {
+app.get('/sell/:sellCity/:maxInvestment/:maxItems', (req, res) => {
     console.log(`Got any to ${req.params.sellCity} request`);
     var result = findSellItems(req.params.sellCity, SELLPRIORITY_BUY_MAX, req.params.maxItems, req.params.maxInvestment);
     res.send(JSON.stringify(result));

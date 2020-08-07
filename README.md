@@ -15,7 +15,7 @@ Supported commands:
 Returns a JSON list of profitable items to trade between buyCity and sellCity, sorted by profit.
 - /trade/:buyCity/:maxInvestment/:maxItems
 Returns a JSON list of profitable items to purchase at buyCity and sell at other cities.
-- /trade/sell/:sellCity/:maxInvestment/:maxItems
+- /sell/:sellCity/:maxInvestment/:maxItems
 Returns a JSON list of items to purchase at other cities that can be sold for a profit at sellCity.
 - /item/:itemID/:quality
 JSON object about an item with given ID and given quality. The important parts of the Object are as follows:
