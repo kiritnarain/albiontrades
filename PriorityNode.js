@@ -18,10 +18,11 @@ class PriorityNode {
         this.buyCityPrice = buyCityPrice;
         this.sellCity = sellCity;
         this.sellCityPrice = sellCityPrice;
-        this.profit = this.sellCityPrice -this.buyCityPrice - this.sellCityPrice*MARKET_TAX;
+        this.tax = Math.ceil(this.sellCityPrice*MARKET_TAX);
+        this.profit = this.sellCityPrice -this.buyCityPrice - this.tax;
         this.quality = quality;
         this.type = 'trade';
-        this.tax = this.sellCityPrice*MARKET_TAX;
+
     }
 
 
