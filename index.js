@@ -324,12 +324,11 @@ function findGlobalProfitItems(buyCity, sellProperty, maxItems, maxInvestment) {
 
                 var pn = new PriorityNode(itemID, buyCity, itemPrices[itemID][quality][buyCity].sell_price_min, maxCity, maxPrice, quality);
                 //Using maximum profit
-                pn.sellGlobal(maxPrice - itemPrices[itemID][quality][buyCity].sell_price_min);
+                //pn.sellGlobal(maxPrice - itemPrices[itemID][quality][buyCity].sell_price_min);
                 if (pn.profit > 0) {
                     //console.log('node is profitable');
                     pq.add(pn);
                 }
-
             }
         }
 

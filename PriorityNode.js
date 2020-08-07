@@ -7,6 +7,7 @@ class PriorityNode {
      * @param buyCityPrice -> Sell price of items in buyCity
      * @param sellCity -> City where items will be sold to
      * @param sellCityPrice -> Either highest buy order price or lowest sell order price in sellCity
+     * @param quality -> Item Quality
      */
     constructor(itemID, buyCity, buyCityPrice, sellCity, sellCityPrice, quality) {
         this.itemID = itemID;
