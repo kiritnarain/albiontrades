@@ -280,7 +280,7 @@ function findGlobalProfitItems(buyCity, sellProperty, maxItems, maxInvestment) {
                 var minPrice = null;
                 for (const [city, obj3] of Object.entries(itemPrices[itemID][quality])) {
                     //console.log('iterating on city: '+city);
-                    if (city !== buyCity) {
+                    if (city !== buyCity && city!=='Black Market') {
                         var price = itemPrices[itemID][quality][city][sellProperty];
                         let sellPriceDate;
                         //Try filtering old listings
@@ -290,10 +290,10 @@ function findGlobalProfitItems(buyCity, sellProperty, maxItems, maxInvestment) {
                             sellPriceDate = Date.parse(itemPrices[itemID][quality][city].sell_price_min_date);
                         }
 
-                        if (city === 'Black Market') { //Always use buy order price for Black Market
+                        /*if (city === 'Black Market') { //Always use buy order price for Black Market
                             price = itemPrices[itemID][quality][city].buy_price_max;
                             sellPriceDate = Date.parse(itemPrices[itemID][quality][city].buy_price_max_date);
-                        }
+                        }*/
 
 
 
