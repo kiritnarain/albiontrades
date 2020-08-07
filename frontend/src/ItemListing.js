@@ -44,7 +44,7 @@ class ItemListing extends React.Component{
             request = `${this.props.API}/trade/${this.props.buyCity}/${this.props.maxInvestment}/${this.props.maxItems}`;
         }else if(this.props.sellCity!==undefined && this.props.sellCity!==''){
             //Any to city trade
-            request = `${this.props.API}/trade/sell/${this.props.sellCity}/${this.props.maxInvestment}/${this.props.maxItems}`;
+            request = `${this.props.API}/sell/${this.props.sellCity}/${this.props.maxInvestment}/${this.props.maxItems}`;
         }else{
             //Any to any trade
             request = `${this.props.API}/trade/${this.props.maxInvestment}/${this.props.maxItems}`;
