@@ -27,6 +27,7 @@ app.use(cors()); // Use this after the variable declaration
 app.get('/', (req, res) => res.send('Hello World!'));
 
 app.get('/trade/:maxInvestment/:maxItems', (req, res) => {
+    console.log('Got any to any request');
     let result = findAnyItems(SELLPRIORITY_BUY_MAX, req.params.maxItems, req.params.maxInvestment);
     res.send(JSON.stringify(result));
 });
@@ -35,6 +36,7 @@ app.get('/trade/:buyCity/:sellCity/:maxInvestment/:maxItems', (req, res) => {
     var buyCity = req.params.buyCity;
     var sellCity = req.params.sellCity;
     var maxItems = req.params.maxItems;
+    console.log(`Got ${buyCity} to ${sellCity} request.`);
     var result = findItems(buyCity, sellCity, SELLPRIORITY_BUY_MAX, maxItems, req.params.maxInvestment);
     res.send(JSON.stringify(result));
 });
@@ -51,21 +53,25 @@ app.get('/trade/:buyCity/:maxInvestment/:maxItems', (req, res) => {
     console.log('got global profit item request');
     var buyCity = req.params.buyCity;
     var maxItems = req.params.maxItems;
+    console.log(`Got ${buyCity} to any request`);
     var result = findGlobalProfitItems(buyCity, SELLPRIORITY_BUY_MAX, maxItems, req.params.maxInvestment);
     res.send(JSON.stringify(result));
 });
 
 app.get('/trade/sell/:sellCity/:maxInvestment/:maxItems', (req, res) => {
+    console.log(`Got any to ${req.params.sellCity} request`);
     var result = findSellItems(req.params.sellCity, SELLPRIORITY_BUY_MAX, req.params.maxItems, req.params.maxInvestment);
     res.send(JSON.stringify(result));
 });
 
 app.get('/item/:itemID/:quality', (req, res) => {
+    console.log(`Got item information request`);
     res.send(JSON.stringify(itemPrices[req.params.itemID][req.params.quality]));
 });
 
 
 app.get('/reload', (req, res) => {
+    console.log('Got reload request');
     lazyFetchPrices();
     res.send('ok');
 });
