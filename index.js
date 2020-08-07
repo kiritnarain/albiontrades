@@ -50,9 +50,15 @@ app.get('/trade/:buyCity/:maxInvestment/:maxItems', (req, res) => {
     res.send(JSON.stringify(result));
 });
 
+app.get('/trade/sell/:sellCity/:maxInvestment/:maxItems', (req, res) => {
+    var result = findSellItems(req.params.sellCity, SELLPRIORITY_BUY_MAX, req.params.maxItems, req.params.maxInvestment);
+    res.send(JSON.stringify(result));
+});
+
 app.get('/item/:itemID/:quality', (req, res) => {
     res.send(JSON.stringify(itemPrices[req.params.itemID][req.params.quality]));
 });
+
 
 app.get('/reload', (req, res) => {
     lazyFetchPrices();
@@ -206,7 +212,41 @@ function findItems(buyCity, sellCity, sellProperty, maxItems, maxInvestment) {
 
     }
     return getItems(pq, maxItems);
+}
 
+function findSellItems(sellCity, sellProperty, maxItems, maxInvestment){
+    var pq = new PriorityQueue();
+    for (const [itemID, obj] of Object.entries(itemPrices)) {
+        for (const [quality, obj2] of Object.entries(itemPrices[itemID])) {
+            if (quality === 'item_name') {
+                continue;
+            }
+            let buyCity = null;
+            let buyPrice = 0;
+            for(const [city, obj3] of Object.entries(itemPrices[itemID][quality])){
+                if(city!==sellCity && city!=='Black Market'){
+                    if(itemPrices[itemID][quality][city].sell_price_min!==0 && isDateValid(itemPrices[itemID][quality][city].sell_price_min_date) &&
+                        itemPrices[itemID][quality][city].sell_price_min>buyPrice){
+                        buyPrice = itemPrices[itemID][quality][city].sell_price_min;
+                        buyCity = city;
+                    }
+                }
+            }
+            if (buyPrice!==null && buyPrice!==0 && isDateValid(itemPrices[itemID][quality][sellCity].sell_price_min_date) && buyPrice <= maxInvestment) {
+                let price = itemPrices[itemID][quality][sellCity][sellProperty];
+                if (sellCity === 'Black Market') {
+                    price = itemPrices[itemID][quality][sellCity].buy_price_max;
+                }
+                var pn = new PriorityNode(itemID, buyCity, buyPrice, sellCity, price, quality);
+                if (pn.profit > 0) {
+                    pq.add(pn);
+                }
+
+            }
+        }
+
+    }
+    return getItems(pq, maxItems);
 }
 
 //Items with higher percentage
