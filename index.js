@@ -5,12 +5,19 @@ PriorityNode = require("./PriorityNode");
 PriorityQueue = require("./PriorityQueue");
 const readline = require('readline');
 var cors = require('cors');
+const OneSignal = require('onesignal-node');
+var onesignal_key = require('./onesignal_key.json'); //Add your notification credentials to this file
+
 
 const ITEM_FILE = 'items.txt';
 const REQUEST_CHUNK_SIZE = 100;
 const SELLPRIORITY_BUY_MAX = 'buy_price_max';
 const SELLPRIORITY_SELL_MIN = 'sell_price_min';
+const priceUpdateMili = 3*60000; //Fetch new prices
+const watchlistUpdateMili = 5*60000; //Update watchlist (send notifications).
 
+var watchList = {}; //Map from 'itemID/quality' -> Priority Node of items with exceedingly good trading profits.
+const WATCHLIST_MIN_PROFIT = 500000; //Minimum profit for items to be put on the watch list
 
 
 var itemPrices = {}; //Map from item_id -> {item_name, city -> prices as defined in the albion online API}
@@ -80,6 +87,8 @@ app.get('/reload', (req, res) => {
 app.listen(port, () => console.log(`AlbionTrades app listening at http://localhost:${port}`));
 
 
+const client = new OneSignal.Client(onesignal_key['appID'], onesignal_key['apiKey']);
+
 /*const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -141,14 +150,15 @@ function loadItems(itemFile) {
             //fetchPrices(itemsString);
             console.log('Total Items Catalogued: ' + csvData.length);
             lazyFetchPrices();
-            setInterval(lazyFetchPrices, 150000);
+            setInterval(lazyFetchPrices, priceUpdateMili);
+            setInterval(generateWatchList, watchlistUpdateMili);
         });
 }
 
 function fetchPrices(itemString) {
-    console.log('Fetching prices');
+    //console.log('Fetching prices');
     https.get(`https://www.albion-online-data.com/api/v2/stats/Prices/${itemString}`, (res) => {
-        console.log('statusCode:', res.statusCode);
+        //console.log('statusCode:', res.statusCode);
 
         var data = '';
 
@@ -167,6 +177,7 @@ function fetchPrices(itemString) {
 }
 
 function lazyFetchPrices() {
+    console.log('Fetching ' + csvData.length + ' items');
     var itemsString = csvData[0];
     for (var i = 1; i < csvData.length; i++) {
         if (i % REQUEST_CHUNK_SIZE === 0) {
@@ -192,17 +203,23 @@ function parsePrices(data) {
         }
 
         itemPrices[snapshot.item_id][snapshot.quality][snapshot.city] = snapshot;
-
-
-        //console.log(snapshot.item_id+": "+itemPrices[snapshot.item_id][snapshot.city].sell_price_min);
+        //console.log('Added item: '+snapshot.item_id);
     }
+
     //console.log(`${Object.keys(itemPrices).length} total items received`);
 }
 
-function findAnyItems(sellProperty, maxItems, maxInvestment){
+function findAnyItems(sellProperty, maxItems, maxInvestment) {
+    let pq = generateAnyItemsQueue(sellProperty);
+    return getItems(pq, maxItems, maxInvestment);
+}
+
+function generateAnyItemsQueue(sellProperty) {
+    //console.log('itemPrices: '+JSON.stringify(itemPrices));
     var pq = new PriorityQueue();
-    for (const [itemID, obj] of Object.entries(itemPrices)) {
-        for (const [quality, obj2] of Object.entries(itemPrices[itemID])) {
+    //console.log(Object.keys(itemPrices));
+    for (const itemID in itemPrices) {
+        for (var [quality, obj2] of Object.entries(itemPrices[itemID])) {
             if (quality === 'item_name') {
                 continue;
             }
@@ -212,43 +229,48 @@ function findAnyItems(sellProperty, maxItems, maxInvestment){
             let sellCity = null;
             let sellPrice = 0;
 
-            for(const[city, obj3] of Object.entries(itemPrices[itemID][quality])){
+            for (const [city, obj3] of Object.entries(itemPrices[itemID][quality])) {
                 //Update buyPrice
-                if( city!=='Black Market' && isDateValid(itemPrices[itemID][quality][city].sell_price_min_date) && (buyCity==null || itemPrices[itemID][quality][city].sell_price_min < buyPrice)){
+                if (city !== 'Black Market' && isDateValid(itemPrices[itemID][quality][city].sell_price_min_date) && (buyCity == null || itemPrices[itemID][quality][city].sell_price_min < buyPrice)) {
                     buyCity = city;
                     buyPrice = itemPrices[itemID][quality][city].sell_price_min;
                 }
 
                 //Update sellPrice
                 let sellDate;
-                if(sellProperty===SELLPRIORITY_BUY_MAX){
+                if (sellProperty === SELLPRIORITY_BUY_MAX) {
                     sellDate = itemPrices[itemID][quality][city].buy_price_max_date;
-                }else{
+                } else {
                     sellDate = itemPrices[itemID][quality][city].sell_price_min_date;
                 }
-                if(isDateValid(sellDate) && (sellCity==null || itemPrices[itemID][quality][city][sellProperty] > sellPrice)){
+                if (isDateValid(sellDate) && (sellCity == null || itemPrices[itemID][quality][city][sellProperty] > sellPrice)) {
                     sellCity = city;
                     sellPrice = itemPrices[itemID][quality][city][sellProperty];
                 }
             }
 
 
-            if (buyCity!==null && sellCity!==null && itemPrices[itemID][quality][buyCity].sell_price_min <= maxInvestment) {
+            if (buyCity !== null && sellCity !== null) {
                 let price = itemPrices[itemID][quality][sellCity][sellProperty];
                 if (sellCity === 'Black Market') {
                     price = itemPrices[itemID][quality][sellCity].buy_price_max;
                 }
                 var pn = new PriorityNode(itemID, buyCity, itemPrices[itemID][quality][buyCity].sell_price_min, sellCity, price, quality);
+                //console.log(`Checking ${itemID}: Buy: ${itemPrices[itemID][quality][buyCity].sell_price_min}. Sell: ${price}`);
                 if (pn.profit > 0) {
+                    //console.log('Adding node');
                     pq.add(pn);
                 }
 
             }
         }
 
+
     }
-    return getItems(pq, maxItems);
+
+    return pq;
 }
+
 
 //sellProperty -> either sell_price_min or buy_price_max
 function findItems(buyCity, sellCity, sellProperty, maxItems, maxInvestment) {
@@ -277,7 +299,7 @@ function findItems(buyCity, sellCity, sellProperty, maxItems, maxInvestment) {
     return getItems(pq, maxItems);
 }
 
-function findSellItems(sellCity, sellProperty, maxItems, maxInvestment){
+function findSellItems(sellCity, sellProperty, maxItems, maxInvestment) {
     var pq = new PriorityQueue();
     for (const [itemID, obj] of Object.entries(itemPrices)) {
         for (const [quality, obj2] of Object.entries(itemPrices[itemID])) {
@@ -286,15 +308,15 @@ function findSellItems(sellCity, sellProperty, maxItems, maxInvestment){
             }
             let buyCity = null;
             let buyPrice = 0;
-            for(const [city, obj3] of Object.entries(itemPrices[itemID][quality])){
-                if(city!==sellCity && city!=='Black Market'){
-                    if(itemPrices[itemID][quality][city].sell_price_min!==0 && isDateValid(itemPrices[itemID][quality][city].sell_price_min_date) && (buyCity==null || itemPrices[itemID][quality][city].sell_price_min<buyPrice)){
+            for (const [city, obj3] of Object.entries(itemPrices[itemID][quality])) {
+                if (city !== sellCity && city !== 'Black Market') {
+                    if (itemPrices[itemID][quality][city].sell_price_min !== 0 && isDateValid(itemPrices[itemID][quality][city].sell_price_min_date) && (buyCity == null || itemPrices[itemID][quality][city].sell_price_min < buyPrice)) {
                         buyPrice = itemPrices[itemID][quality][city].sell_price_min;
                         buyCity = city;
                     }
                 }
             }
-            if (buyCity!==null && buyPrice!==0 && buyPrice <= maxInvestment) {
+            if (buyCity !== null && buyPrice !== 0 && buyPrice <= maxInvestment) {
                 let price = itemPrices[itemID][quality][sellCity][sellProperty];
                 if (sellCity === 'Black Market') {
                     price = itemPrices[itemID][quality][sellCity].buy_price_max;
@@ -331,25 +353,64 @@ function findSellItems(sellCity, sellProperty, maxItems, maxInvestment){
 
 
 /**
- * Helper function to print items in the priority queue
+ * Helper function to print items in the priority queue. This also populates the watchList
  * @param pq
  * @param maxItems
  */
-function getItems(pq, maxItems) {
+function getItems(pq, maxItems, maxInvestment = Number.MAX_SAFE_INTEGER) {
     var i = 0;
     var result = [];
     while (!pq.isEmpty()) {
         var node = pq.remove();
-        addItemMeta(node);
-        //console.log(`${i}th most profitable item (profit +${node.profit}: ${node.itemID}. Buy from ${node.buyCity}(${node.buyCityPrice}), sell at ${node.sellCity}(${node.sellCityPrice})`);
-        result.push(node);
-        console.log('displaying: ' + node.itemID);
-        if (i >= maxItems) {
-            break;
+        if (node.buyCityPrice <= maxInvestment) {
+            addItemMeta(node);
+            //console.log(`${i}th most profitable item (profit +${node.profit}: ${node.itemID}. Buy from ${node.buyCity}(${node.buyCityPrice}), sell at ${node.sellCity}(${node.sellCityPrice})`);
+            result.push(node);
+            if (i >= maxItems) {
+                break;
+            }
+            i++;
         }
-        i++;
+
     }
     return result;
+}
+
+/**
+ * Callback when data finished updated
+ */
+
+/*function dataUpdated(){
+    generateWatchList(SELLPRIORITY_BUY_MAX);
+}*/
+
+function generateWatchList() {
+
+    let pq = generateAnyItemsQueue(SELLPRIORITY_BUY_MAX); //Invariant: pq sorted descending by highest profit
+    //console.log('Generated Items: ' + pq.size);
+    while (!pq.isEmpty()) {
+        var node = pq.remove();
+        if (node.profit <= WATCHLIST_MIN_PROFIT) {
+            break;
+        }
+        addItemMeta(node);
+        //console.log(`${i}th most profitable item (profit +${node.profit}: ${node.itemID}. Buy from ${node.buyCity}(${node.buyCityPrice}), sell at ${node.sellCity}(${node.sellCityPrice})`);
+        addToWatchList(node);
+    }
+}
+
+/**
+ *
+ * @param node - Priority Node of item traded
+ */
+function addToWatchList(node) {
+    let id = node.itemID + '/' + node.quality;
+    if (watchList[id] === null || watchList[id] === undefined) {
+        watchList[id] = node;
+        //Notify
+        console.log(`Adding ${id} to watchlist: +${node.profit}`);
+        sendWatchlistItemNotification(node);
+    }
 }
 
 function addItemMeta(itemNode) {
@@ -357,12 +418,12 @@ function addItemMeta(itemNode) {
     itemNode.enchantment = fetchEnchantment(itemNode.itemID);
 }
 
-function fetchEnchantment(itemID){
+function fetchEnchantment(itemID) {
     let atIndex = itemID.lastIndexOf('@');
-    if(atIndex===-1){
+    if (atIndex === -1) {
         return 0;
     }
-    return parseInt(itemID.charAt(atIndex+1));
+    return parseInt(itemID.charAt(atIndex + 1));
 }
 
 function findGlobalProfitItems(buyCity, sellProperty, maxItems, maxInvestment) {
@@ -382,13 +443,16 @@ function findGlobalProfitItems(buyCity, sellProperty, maxItems, maxInvestment) {
                 var minPrice = null;
                 for (const [city, obj3] of Object.entries(itemPrices[itemID][quality])) {
                     //console.log('iterating on city: '+city);
-                    if (city !== buyCity && city!=='Black Market') {
+                    if (city !== buyCity) {
                         var price = itemPrices[itemID][quality][city][sellProperty];
+                        if (city === 'Black Market') {
+                            price = itemPrices[itemID][quality][city]['buy_price_max'];
+                        }
                         let sellPriceDate;
                         //Try filtering old listings
-                        if(sellProperty===SELLPRIORITY_BUY_MAX){
+                        if (sellProperty === SELLPRIORITY_BUY_MAX || city === 'Black Market') {
                             sellPriceDate = Date.parse(itemPrices[itemID][quality][city].buy_price_max_date);
-                        }else{
+                        } else {
                             sellPriceDate = Date.parse(itemPrices[itemID][quality][city].sell_price_min_date);
                         }
 
@@ -396,8 +460,6 @@ function findGlobalProfitItems(buyCity, sellProperty, maxItems, maxInvestment) {
                             price = itemPrices[itemID][quality][city].buy_price_max;
                             sellPriceDate = Date.parse(itemPrices[itemID][quality][city].buy_price_max_date);
                         }*/
-
-
 
 
                         if (price !== 0 && (Date.now() - sellPriceDate) < dataValidityTime) {
@@ -442,4 +504,22 @@ function isDateValid(dateStr) {
     return (Date.now() - Date.parse(dateStr) < dataValidityTime);
 }
 
+async function sendWatchlistItemNotification(node){
+    const notification = {
+        contents: {
+            'en': `${node.itemID}/${node.quality} trading for +${node.profit}`,
+        },
+        headings: {
+            'en': `Trade ${node.buyCity} to ${node.sellCity}`
+        },
+        included_segments: ['Subscribed Users'],
+    };
 
+
+// or you can use promise style:
+    client.createNotification(notification)
+        .then(response => {})
+        .catch(e => {
+            console.log(e);
+        });
+}

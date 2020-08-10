@@ -22,7 +22,6 @@ class PriorityNode {
         this.profit = this.sellCityPrice -this.buyCityPrice - this.tax;
         this.quality = quality;
         this.type = 'trade';
-
     }
 
 

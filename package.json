@@ -30,6 +30,7 @@
     "cors": "^2.8.5",
     "csv-parse": "^4.11.1",
     "express": "^4.17.1",
-    "https": "^1.0.0"
+    "https": "^1.0.0",
+    "onesignal-node": "^3.1.5"
   }
 }

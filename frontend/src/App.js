@@ -3,6 +3,8 @@ import logo from './logo.svg';
 import './App.css';
 import Picker from "./Picker";
 import ItemListing from "./ItemListing";
+import OneSignal from 'react-onesignal';
+
 
 class App extends React.Component{
     constructor(props) {
@@ -14,7 +16,7 @@ class App extends React.Component{
 
 
         this.state = {
-            API: 'http://139.162.48.23:5000',
+            API: 'https://albionapi.kiritnarain.com',
             maxItems: 30,
             maxInvestment: maxInvestment,
             buyCity: '',
@@ -22,6 +24,19 @@ class App extends React.Component{
             cities: ['Bridgewatch', 'Lymhurst', 'Thetford', 'Fort Sterling', 'Martlock', 'Caerleon', 'Black Market']
         }
     }
+
+    componentDidMount() {
+        /*OneSignal.initialize('ea87dcb7-5f82-4927-b918-5009c36821ad', {
+            requiresUserPrivacyConsent: false,
+            allowLocalhostAsSecureOrigin: true,
+            notifyButton: {
+                enable: true,
+                size: 'small',
+                position: 'bottom-right'
+            }
+        });*/
+    }
+
 
     buyCitySelected = (event) => {
         this.setState({
