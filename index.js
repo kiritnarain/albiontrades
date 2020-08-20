@@ -18,9 +18,12 @@ const watchlistUpdateMili = 5*60000; //Update watchlist (send notifications).
 
 var watchList = {}; //Map from 'itemID/quality' -> Priority Node of items with exceedingly good trading profits.
 const WATCHLIST_MIN_PROFIT = 500000; //Minimum profit for items to be put on the watch list
+setInterval(function () {
+    watchList = {}; //Clear watchlist every 12 hours.
+}, 12*3600000);
 
 
-var itemPrices = {}; //Map from item_id -> {item_name, city -> prices as defined in the albion online API}
+var itemPrices = {}; //Map from item_id -> {item_name, quality -> {city -> prices as defined in the albion online API}}
 const dataValidityTime = 24 * 3600000; //Hours * MILI in 1 hour
 var csvData = [];
 
@@ -73,7 +76,7 @@ app.get('/sell/:sellCity/:maxInvestment/:maxItems', (req, res) => {
 });
 
 app.get('/item/:itemID/:quality', (req, res) => {
-    console.log(`Got item information request`);
+    //console.log(`Got item information request`);
     res.send(JSON.stringify(itemPrices[req.params.itemID][req.params.quality]));
 });
 
@@ -413,9 +416,12 @@ function addToWatchList(node) {
     }
 }
 
+//Warning: Assumes using buy order price
 function addItemMeta(itemNode) {
     itemNode.itemName = itemPrices[itemNode.itemID].item_name;
     itemNode.enchantment = fetchEnchantment(itemNode.itemID);
+    itemNode.buyCityPriceDate = itemPrices[itemNode.itemID][itemNode.quality][itemNode.buyCity].sell_price_min_date;
+    itemNode.sellCityPriceDate = itemPrices[itemNode.itemID][itemNode.quality][itemNode.sellCity].buy_price_max_date;
 }
 
 function fetchEnchantment(itemID) {
