@@ -1,4 +1,21 @@
 .summaryContainer   {
-    display: block;
+    background-color: rgba(255, 255, 255, 0.05);
     float: right;
+}
+h3{
+    color: var(--white);
+}
+
+h4  {
+    font-size: 15pt;
+    color: var(--white);
+    opacity: 70%;
+}
+
+.orange   {
+    color: var(--orange);
+}
+
+.green {
+    color: var(--green);
 }

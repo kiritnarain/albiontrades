@@ -5,3 +5,17 @@
 .expiredColor {
     color: #fc4a03;
 }
+
+.marketContainer    {
+    margin-top: 40px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+th  {
+    color: var(--white);
+    opacity: 80%;
+}
+
+.cityRow   {
+    color: var(--white);
+}

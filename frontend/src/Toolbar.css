@@ -1,0 +1,14 @@
+.toolbar    {
+    background-color: var(--lightgray);
+}
+
+h1 {
+    color: var(--white);
+    font-size: 25pt;
+}
+
+.tagline    {
+    color: var(--white);
+    font-size: 21pt;
+    text-align: right;
+}

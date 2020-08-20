@@ -36,9 +36,14 @@ class TradeSummary extends React.Component{
         }
 
         return (
-            <div className="summaryContainer">
-                <h4>Expected cost: {this.state.totalCost}</h4>
-                <h4>Expected profit: {this.state.totalProfit}</h4>
+            <div className="container-fluid summaryContainer">
+                <div className="row">
+                    <div className="col-sm-12">
+                        <h3>Trade Summary</h3>
+                        <h4 >Expected cost: {this.state.totalCost}</h4>
+                        <h4>Expected profit: {this.state.totalProfit}</h4>
+                    </div>
+                </div>
                 {listing}
             </div>
         )

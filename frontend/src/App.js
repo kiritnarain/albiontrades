@@ -4,6 +4,8 @@ import './App.css';
 import Picker from "./Picker";
 import ItemListing from "./ItemListing";
 import OneSignal from 'react-onesignal';
+import Toolbar from "./Toolbar";
+import Footer from "./Footer";
 
 
 class App extends React.Component{
@@ -17,7 +19,7 @@ class App extends React.Component{
 
         this.state = {
             API: 'https://albionapi.kiritnarain.com',
-            maxItems: 30,
+            maxItems: 50,
             maxInvestment: maxInvestment,
             buyCity: '',
             sellCity: '',
@@ -69,8 +71,10 @@ class App extends React.Component{
     render(){
         return (
             <div>
+                <Toolbar />
                 <Picker buyCity={this.state.buyCity} onBuyCity={this.buyCitySelected} sellCity={this.state.sellCity} onSellCity={this.sellCitySelected} maxItems={this.state.maxItems} onMaxItems={this.maxItemsChanged} cities={this.state.cities} maxInvestment={this.state.maxInvestment} onMaxInvestment={this.maxInvestmentChanged}/>
                 <ItemListing API={this.state.API} buyCity={this.state.buyCity} sellCity={this.state.sellCity} maxItems={this.state.maxItems} cities={this.state.cities} maxInvestment={this.state.maxInvestment}/>
+                <Footer />
             </div>
         )
     }

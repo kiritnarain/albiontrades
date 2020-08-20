@@ -1,6 +1,7 @@
 import React from 'react';
 import SingleItem from "./SingleItem";
 import TradeSummary from "./TradeSummary";
+
 class ItemListing extends React.Component{
     constructor(props) {
         super(props);
@@ -79,9 +80,21 @@ class ItemListing extends React.Component{
             combinedElements.push(<SingleItem key={this.state.itemsList[item].itemID+'/'+this.state.itemsList[item].quality} item={this.state.itemsList[item]} API={this.props.API} cities={this.props.cities} onAddToSummary={this.addToSummary}/>);
         }
         return(
-            <div>
-                <TradeSummary tradeSummary={this.state.tradeSummary} onRemove={this.removeFromSummary}/>
-                {combinedElements}
+            <div className="container-fluid" style={{marginTop: 40}}>
+                <div className="row">
+                    <div className="col-md-9 offset-md-1">
+                        <div className="container-fluid">
+                            <div className="row">
+                                {combinedElements}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-md-2 nopadding">
+                        <TradeSummary tradeSummary={this.state.tradeSummary} onRemove={this.removeFromSummary}/>
+                    </div>
+                </div>
+
+
             </div>
         )
     }

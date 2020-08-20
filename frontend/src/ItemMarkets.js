@@ -40,23 +40,59 @@ class ItemMarkets extends React.Component{
             //console.log('Rendering market for city: '+city);
             let sellColor = 'activeColor';
             let buyColor = 'activeColor';
-            if(Date.now() - Date.parse(this.state.itemMarket[city].sell_price_min_date) > this.PRICE_VALIDITY){
+            const sellPriceDate = Date.parse(this.state.itemMarket[city].sell_price_min_date+'Z');
+            const sellPriceDateDiff = Date.now()-  sellPriceDate;
+            const buyPriceDate =   Date.parse(this.state.itemMarket[city].buy_price_max_date+'Z');
+            const buyPriceDateDiff = Date.now() - buyPriceDate;
+            if(sellPriceDateDiff> this.PRICE_VALIDITY){
                 sellColor = 'expiredColor';
             }
-            if(Date.now() - Date.parse(this.state.itemMarket[city].buy_price_max_date) > this.PRICE_VALIDITY){
+            if(buyPriceDateDiff > this.PRICE_VALIDITY){
                 buyColor = 'expiredColor';
             }
             return (
-                <tr>
-                    <td>{city}</td>
-                    <td className={sellColor}>{this.state.itemMarket[city].sell_price_min}</td>
-                    <td className={buyColor}>{this.state.itemMarket[city].buy_price_max}</td>
-                    <td>{this.state.itemMarket[city].sell_price_min_date}</td>
-                    <td>{this.state.itemMarket[city].buy_price_max_date}</td>
+                <tr align="center">
+                    <td className="cityRow">{city}</td>
+                    <td className={sellColor}>{this.getReadablePrice(this.state.itemMarket[city].sell_price_min)}</td>
+                    <td className={buyColor}>{this.getReadablePrice(this.state.itemMarket[city].buy_price_max)}</td>
+                    <td className={sellColor}>{this.getReadableTimeDiff(sellPriceDateDiff)}</td>
+                    <td className={buyColor}>{this.getReadableTimeDiff(buyPriceDateDiff)}</td>
                 </tr>
             )
         }
     };
+
+    //Returns a string containing the number of minutes represented by dateDiff(miliseconds) if <1 hour,
+    //Otherwise returns number of hours represented by dateDiff
+    getReadableTimeDiff(dateDiff){
+        if(dateDiff<3600000){
+            //Less than 1 hour, returns number of minutes
+            const min = Math.floor(dateDiff/60000);
+            return `${min} min`;
+        }else if(dateDiff<86400000){ //less than 1 day
+            //Returns number of hours
+            const hours = Math.floor(dateDiff/3600000);
+            if(hours===1){
+                return `${hours} hour`;
+            }
+            return `${hours} hours`;
+        }else if(dateDiff<63732700800000){ //Maximum valid timediff
+            const days = Math.floor(dateDiff/86400000);
+            if(days===1){
+                return `${days} day`;
+            }
+            return `${days} days`;
+        }
+        return `-`; //Invalid date
+
+    }
+
+    getReadablePrice(price){
+        if(price===0){
+            return '-';
+        }
+        return `${price}`;
+    }
 
     render(){
         var combined= [];
@@ -66,19 +102,23 @@ class ItemMarkets extends React.Component{
         }
 
         return(
-            <div>
-                <table>
-                    <tbody>
-                    <tr>
-                        <th>City</th>
-                        <th>Sell Order Price</th>
-                        <th>Buy Order Price</th>
-                        <th>Sell Order Price Date</th>
-                        <th>Buy Order Price Date</th>
-                    </tr>
-                    {combined}
-                    </tbody>
-                </table>
+            <div className="container-fluid marketContainer">
+                <div className="row">
+                    <div className="col-sm-12">
+                        <table>
+                            <tbody>
+                            <tr align="center">
+                                <th>City</th>
+                                <th>Sell</th>
+                                <th>Buy</th>
+                                <th>Sell Updated</th>
+                                <th>Buy Updated</th>
+                            </tr>
+                            {combined}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         )
     }

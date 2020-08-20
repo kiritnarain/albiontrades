@@ -416,7 +416,7 @@ function addToWatchList(node) {
     }
 }
 
-//Warning: Assumes using buy order price
+//Warning: Assumes using buy order price (BUY_PRICE_MAX)
 function addItemMeta(itemNode) {
     itemNode.itemName = itemPrices[itemNode.itemID].item_name;
     itemNode.enchantment = fetchEnchantment(itemNode.itemID);
