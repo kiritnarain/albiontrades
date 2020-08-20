@@ -15,7 +15,7 @@ class ItemMarkets extends React.Component{
 
     fetchItemMarkets(){
         const request = `${this.props.API}/item/${this.props.itemID}/${this.props.quality}`;
-        console.log('send request: '+request);
+        //console.log('send request: '+request);
         fetch(request)
             .then(res => res.json())
             .then(

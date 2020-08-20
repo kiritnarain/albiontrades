@@ -11,12 +11,12 @@
 
 .fullWhite  {
     color: var(--white);
-    opacity: 100%;
+    opacity: 1.0;
 }
 
 .removeButton   {
     color: var(--white);
-    opacity: 100%;
+    opacity: 1.0;
     position: absolute;
     right: 30px;
     z-index: 1000;

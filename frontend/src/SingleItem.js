@@ -5,7 +5,7 @@ import {getReadableTimeDiffFromNow, qualityToString} from "./Util";
 class SingleItem extends React.Component{
     constructor(props) {
         super(props);
-        console.log('Using: '+props.item.buyCityPriceDate);
+        //console.log('Using: '+props.item.buyCityPriceDate);
         this.state = {
             qualityStr: qualityToString(props.item.quality),
             buyCityPriceDateDiff: getReadableTimeDiffFromNow(props.item.buyCityPriceDate),

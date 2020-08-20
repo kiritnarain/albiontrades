@@ -82,14 +82,14 @@ class ItemListing extends React.Component{
         return(
             <div className="container-fluid" style={{marginTop: 40}}>
                 <div className="row">
-                    <div className="col-md-9 offset-md-1">
+                    <div className="col-md-9 offset-md-1 order-md-first order-sm-last">
                         <div className="container-fluid">
                             <div className="row">
                                 {combinedElements}
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-2 nopadding">
+                    <div className="col-md-2 nopadding order-md-last order-sm-first">
                         <TradeSummary tradeSummary={this.state.tradeSummary} onRemove={this.removeFromSummary}/>
                     </div>
                 </div>

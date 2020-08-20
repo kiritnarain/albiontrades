@@ -1,11 +1,12 @@
 span    {
     color: var(--white);
     font-size: 15pt;
-    opacity: 80%;
+    opacity: 0.8;
 }
 
 .citySelect{
     background-color: var(--white);
+    font-size: 13pt;
 }
 
 .citySelect option{
