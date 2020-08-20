@@ -1,5 +1,5 @@
 # albiontrades
-Marketplace trading tool for Albion Online MMO
+Marketplace trading tool for Albion Online MMO. See https://albiontrades.kiritnarain.com/ for the frontend interface.
 
 Albion Trades consists of 2 parts:
 1) A public, open source API to retrieve a JSON list of profitable trades between cities (root folder). This is built with NodeJS and Express.
